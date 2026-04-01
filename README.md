@@ -26,6 +26,41 @@ A minimal Python implementation of Claude Code in ~1300 lines, supporting Claude
 
 ---
 
+  * [🔥🔥🔥 News (Pacific Time)](#-------news--pacific-time-)
+- [Nano Claude Code](#nano-claude-code)
+  * [Features](#features)
+  * [Supported Models](#supported-models)
+    + [Closed-Source (API)](#closed-source--api-)
+    + [Open-Source (Local via Ollama)](#open-source--local-via-ollama-)
+  * [Installation](#installation)
+  * [Usage: Closed-Source API Models](#usage--closed-source-api-models)
+    + [Anthropic Claude](#anthropic-claude)
+    + [OpenAI GPT](#openai-gpt)
+    + [Google Gemini](#google-gemini)
+    + [Kimi (Moonshot AI)](#kimi--moonshot-ai-)
+    + [Qwen (Alibaba DashScope)](#qwen--alibaba-dashscope-)
+    + [Zhipu GLM](#zhipu-glm)
+    + [DeepSeek](#deepseek)
+  * [Usage: Open-Source Models (Local)](#usage--open-source-models--local-)
+    + [Option A — Ollama (Recommended)](#option-a---ollama--recommended-)
+    + [Option B — LM Studio](#option-b---lm-studio)
+    + [Option C — vLLM / Self-Hosted OpenAI-Compatible Server](#option-c---vllm---self-hosted-openai-compatible-server)
+  * [Model Name Format](#model-name-format)
+  * [CLI Reference](#cli-reference)
+  * [Slash Commands (REPL)](#slash-commands--repl-)
+  * [Configuring API Keys](#configuring-api-keys)
+    + [Method 1: Environment Variables (recommended)](#method-1--environment-variables--recommended-)
+    + [Method 2: Set Inside the REPL (persisted)](#method-2--set-inside-the-repl--persisted-)
+    + [Method 3: Edit the Config File Directly](#method-3--edit-the-config-file-directly)
+  * [Permission System](#permission-system)
+  * [Built-in Tools](#built-in-tools)
+  * [CLAUDE.md Support](#claudemd-support)
+  * [Session Management](#session-management)
+  * [Project Structure](#project-structure)
+  * [FAQ](#faq)
+
+
+
 
 ## Features
 
