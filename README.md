@@ -108,7 +108,7 @@ Claude Code is a powerful, production-grade AI coding assistant — but its sour
 | Voice input | Proprietary Anthropic WebSocket (OAuth required) | Local Whisper / OpenAI API — works offline, no subscription |
 | Model providers | Anthropic only | 7+ (Anthropic · OpenAI · Gemini · Kimi · Qwen · DeepSeek · Ollama · …) |
 | Local models | No | Yes — Ollama, LM Studio, vLLM, any OpenAI-compatible endpoint |
-| Build step required | Yes (Bun + esbuild) | No — run directly with `nano_claude` |
+| Build step required | Yes (Bun + esbuild) | No — run directly with `python nano_claude.py` (or install to use `nano_claude`) |
 | Runtime extensibility | Closed (compile-time) | Open — `register_tool()` at runtime, Markdown skills, git plugins |
 | Task dependency graph | No | Yes — `blocks` / `blocked_by` edges in `task/` package |
 
