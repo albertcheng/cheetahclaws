@@ -1414,6 +1414,35 @@ def cmd_voice(args: str, state, config) -> bool:
     return ("__voice__", text)
 
 
+def cmd_image(args: str, state, config) -> Union[bool, tuple]:
+    """Grab image from clipboard and send to vision model with optional prompt."""
+    try:
+        from PIL import ImageGrab
+        import io, base64
+    except ImportError:
+        err("Pillow is required for /image. Install with: pip install Pillow")
+        return True
+
+    img = ImageGrab.grabclipboard()
+    if img is None:
+        err("No image found in clipboard. Copy an image first (e.g. Win+Shift+S)")
+        return True
+
+    # Convert to base64 PNG
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    size_kb = len(buf.getvalue()) / 1024
+
+    info(f"📷 Clipboard image captured ({size_kb:.0f} KB, {img.size[0]}x{img.size[1]})")
+
+    # Store in config for agent.py to pick up
+    config["_pending_image"] = b64
+
+    prompt = args.strip() if args.strip() else "What do you see in this image? Describe it in detail."
+    return ("__image__", prompt)
+
+
 COMMANDS = {
     "help":        cmd_help,
     "clear":       cmd_clear,
@@ -1438,6 +1467,7 @@ COMMANDS = {
     "proactive":   cmd_proactive,
     "cloudsave":   cmd_cloudsave,
     "voice":       cmd_voice,
+    "image":       cmd_image,
     "exit":        cmd_exit,
     "quit":        cmd_exit,
     "resume":      cmd_resume
@@ -1678,6 +1708,14 @@ def repl(config: dict, initial_prompt: str = None):
                 _, voice_text = result
                 try:
                     run_query(voice_text)
+                except KeyboardInterrupt:
+                    print(clr("\n  (interrupted)", "yellow"))
+                continue
+            # Image sentinel: ("__image__", prompt_text)
+            if result[0] == "__image__":
+                _, image_prompt = result
+                try:
+                    run_query(image_prompt)
                 except KeyboardInterrupt:
                     print(clr("\n  (interrupted)", "yellow"))
                 continue
