@@ -70,6 +70,15 @@ English | [中文](https://github.com/SafeRL-Lab/clawspring/blob/main/docs/READM
 ## 🔥🔥🔥 News (Pacific Time)
 
 
+- Apr 06, 2026 (**v3.05.5**): **Project renamed from Nano Claude Code to ClawSpring**
+  - The project has been rebranded from **Nano Claude Code** to **ClawSpring** — a more distinctive name that captures the spirit of the tool: a sharp, agile coding assistant. The `Cl` in ClawSpring is a subtle nod to Claude.
+  - CLI command: `nano_claude` → `clawspring`
+  - PyPI package: `nano-claude-code` → `clawspring`
+  - Config directory: `~/.nano_claude/` → `~/.clawnest/` → `~/.clawspring/`
+  - Main entry point: `nano_claude.py` → `clawspring.py`
+  - All documentation, GitHub URLs, and internal references updated accordingly.
+  - Added **ClawSpring vs OpenClaw** comparison section to README.
+
 - 00.29 PM, Apr 06, 2026 (**v3.05.5**): **SSJ Developer Mode, Telegram Bridge, Worker Command, and UX improvements**
   - **`/ssj` — SSJ Developer Mode**: Interactive power menu with 10 workflow options: Brainstorm, TODO viewer, Worker, Expert Debate, Propose Improvements, Code Review, README generator, Commit helper, Git Diff Scan, and Idea-to-Tasks Promotion. Menu stays open between actions and supports `/command` passthrough (e.g. `/exit` works from inside SSJ).
   - **`/worker` command**: Auto-implements pending tasks from `brainstorm_outputs/todo_list.txt` one by one. Supports selecting specific tasks with comma-separated numbers (e.g. `1,4,6`), a custom todo file path (`--path /other/todo.md`), and a worker count limit (`--workers 3`). If you accidentally pass a brainstorm `.md` output file, Worker detects it and offers to redirect to `todo_list.txt` — or to generate it first from the brainstorm file and then run Worker automatically. Each task gets a dedicated prompt that reads code, implements the change, and marks it done.
