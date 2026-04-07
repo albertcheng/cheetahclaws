@@ -35,6 +35,28 @@ _openai_whisper_model = None
 DEFAULT_MODEL_SIZE = os.environ.get("NANO_CLAUDE_WHISPER_MODEL", "base")
 
 
+# ── OGG/audio file → PCM conversion ──────────────────────────────────────
+
+def _audio_file_to_pcm(audio_bytes: bytes, suffix: str = ".ogg") -> bytes:
+    """Convert an audio file (OGG, MP3, etc.) to raw int16 PCM (16kHz mono) via ffmpeg."""
+    import subprocess
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
+        f.write(audio_bytes)
+        f.flush()
+        tmp_in = f.name
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-y", "-i", tmp_in, "-f", "s16le", "-ar", str(SAMPLE_RATE),
+             "-ac", str(CHANNELS), "-acodec", "pcm_s16le", "-"],
+            capture_output=True, timeout=30,
+        )
+        if r.returncode != 0:
+            raise RuntimeError(f"ffmpeg failed: {r.stderr[:200]}")
+        return r.stdout
+    finally:
+        Path(tmp_in).unlink(missing_ok=True)
+
+
 # ── WAV helper ────────────────────────────────────────────────────────────
 
 def _pcm_to_wav(pcm_bytes: bytes) -> bytes:
@@ -269,4 +291,39 @@ def transcribe(
         "No STT backend available.\n"
         "Install faster-whisper:  pip install faster-whisper\n"
         "Or set OPENAI_API_KEY to use the OpenAI Whisper cloud API."
+    )
+
+
+def transcribe_audio_file(
+    audio_bytes: bytes,
+    suffix: str = ".ogg",
+    language: str = "auto",
+) -> str:
+    """Transcribe an audio file (OGG, MP3, etc.) to text.
+
+    Converts to PCM via ffmpeg, then runs through the STT pipeline.
+    Falls back to OpenAI Whisper API (which accepts OGG natively) if
+    ffmpeg is not available.
+    """
+    # Try ffmpeg conversion → local STT
+    try:
+        pcm = _audio_file_to_pcm(audio_bytes, suffix)
+        return transcribe(pcm, language=language)
+    except (RuntimeError, FileNotFoundError):
+        pass
+
+    # Fallback: OpenAI Whisper API accepts OGG directly
+    if os.environ.get("OPENAI_API_KEY"):
+        from openai import OpenAI
+        client = OpenAI()
+        kwargs: dict = {"model": "whisper-1", "file": (f"audio{suffix}", io.BytesIO(audio_bytes), "audio/ogg")}
+        lang = None if language == "auto" else language
+        if lang:
+            kwargs["language"] = lang
+        transcript = client.audio.transcriptions.create(**kwargs)
+        return transcript.text.strip()
+
+    raise RuntimeError(
+        "Cannot transcribe audio file.\n"
+        "Install ffmpeg for local conversion, or set OPENAI_API_KEY for cloud STT."
     )

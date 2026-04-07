@@ -9,7 +9,7 @@ voice_input(...)     → transcribed text (record + transcribe in one call)
 """
 
 from .recorder import check_recording_availability, record_until_silence, list_input_devices
-from .stt import check_stt_availability, transcribe
+from .stt import check_stt_availability, transcribe, transcribe_audio_file
 from .keyterms import get_voice_keyterms
 
 
@@ -45,6 +45,7 @@ __all__ = [
     "record_until_silence",
     "list_input_devices",
     "transcribe",
+    "transcribe_audio_file",
     "get_voice_keyterms",
     "voice_input",
 ]
