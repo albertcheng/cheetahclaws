@@ -795,20 +795,34 @@ def _ask_user_question(
     return "(no answer — timeout)"
 
 
-def ask_input_interactive(prompt: str, config: dict) -> str:
-    """Prompt the user for input, routing to Telegram if in a Telegram turn."""
+def ask_input_interactive(prompt: str, config: dict, context: str = "") -> str:
+    """Prompt the user for input, routing to Telegram if in a Telegram turn.
+
+    Args:
+        prompt:  The input prompt shown to the user.
+        config:  Agent config dict (used to detect Telegram context).
+        context: Optional menu/list text to send to Telegram *before* the prompt,
+                 so the remote user can see the available options.
+    """
     is_tg = config.get("_in_telegram_turn", False)
     if is_tg and "_tg_send_callback" in config:
+        import re, threading
         token = config.get("telegram_token")
         chat_id = config.get("telegram_chat_id")
-        import re, threading
-        clean_prompt = re.sub(r'\x1b\[[0-9;]*m', '', prompt).strip()
-        config["_tg_send_callback"](token, chat_id, f"❓ *Input Required*\n{clean_prompt}")
-        
+        send = config["_tg_send_callback"]
+        strip_ansi = lambda s: re.sub(r'\x1b\[[0-9;]*m', '', s).strip()
+
+        # Send context (menu/list) first if provided
+        if context:
+            send(token, chat_id, strip_ansi(context))
+
+        clean_prompt = strip_ansi(prompt)
+        send(token, chat_id, f"❓ *Input Required*\n{clean_prompt}")
+
         evt = threading.Event()
         config["_tg_input_event"] = evt
         evt.wait()
-        
+
         text = config.pop("_tg_input_value", "").strip()
         config.pop("_tg_input_event", None)
         return text

@@ -547,16 +547,34 @@ def stream_ollama(
     if tool_schemas and not config.get("no_tools"):
         payload["tools"] = tools_to_openai(tool_schemas)
 
-    req = urllib.request.Request(
-        f"{base_url.rstrip('/')}/api/chat",
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"}
-    )
-    
+    def _make_request(p):
+        return urllib.request.Request(
+            f"{base_url.rstrip('/')}/api/chat",
+            data=json.dumps(p).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+
+    req = _make_request(payload)
+
     text = ""
     tool_buf: dict = {}
-    
-    with urllib.request.urlopen(req) as resp:
+
+    try:
+        resp_cm = urllib.request.urlopen(req)
+    except urllib.error.HTTPError as e:
+        if e.code == 500 and "tools" in payload:
+            # Model doesn't support tool calling — retry without tools
+            print(
+                f"\n\033[33m[warn] {model} returned HTTP 500 (likely no tool-calling support)."
+                " Retrying without tools.\033[0m"
+            )
+            payload.pop("tools", None)
+            req = _make_request(payload)
+            resp_cm = urllib.request.urlopen(req)
+        else:
+            raise
+
+    with resp_cm as resp:
         for line in resp:
             if not line.strip(): continue
             try:
